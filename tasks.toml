@@ -1,0 +1,6 @@
+title = "Task list"
+
+[task]
+subject = "Shopping"
+message = "Sugar, flour, other stuff"
+number = 1
