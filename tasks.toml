@@ -1,6 +1,10 @@
 title = "Task list"
 
-[task]
+[[task]]
 subject = "Shopping"
 message = "Sugar, flour, other stuff"
 number = 1
+[[task]]
+subject = "Cleaning"
+message = "floor"
+number = 2
