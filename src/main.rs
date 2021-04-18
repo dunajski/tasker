@@ -1,15 +1,15 @@
 extern crate clap;
 use clap::*;
-use std::{fs::File, io::prelude::*, io::BufReader, vec::Vec,};
 use serde::{Deserialize, Serialize};
+use std::{fs::File, io::prelude::*, io::BufReader, vec::Vec};
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize,  Debug)]
 struct TaskList {
     title: String,
     task: Vec<Task>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 struct Task {
     subject: String,
     message: String,
@@ -30,19 +30,39 @@ fn main() -> std::io::Result<()> {
         .get_matches();
 
     // matches.is_present("s")
-    match matches.occurrences_of("show") {
-        1 => println!("show tasks!"),
-        _ => println!("I have nothing to do :<"),
-    }
-
     let file = File::open("tasks.toml")?;
     let mut buf_reader = BufReader::new(file);
     let mut contents = String::new();
     buf_reader.read_to_string(&mut contents)?;
 
-    let task: TaskList = toml::from_str(&contents).unwrap();
+    let mut task: TaskList = toml::from_str(&contents).unwrap();
+
+    match matches.occurrences_of("show") {
+        1 => {
+            for x in &task.task {
+                println!("{:?}", x.subject);
+                println!("{:?}", x.message);
+                println!();
+            }
+        }
+        _ => println!("I have nothing to do :<"),
+    }
+
+    // println!("{:?}", task);
+    
+    let new_task = Task {
+        subject: "example title".to_string(),
+        message: "example message".to_string(),
+        number: 6,
+    };
+    
+    task.task.push(new_task);
 
     println!("{:?}", task);
 
+    let toml = toml::to_string(&task).unwrap();
+
+    let mut file = File::create("tasks.toml")?;
+    file.write(toml.as_bytes())?;
     Ok(())
 }
