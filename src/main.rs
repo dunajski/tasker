@@ -1,7 +1,41 @@
 extern crate clap;
 use clap::*;
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::prelude::*, io::BufReader, vec::Vec};
+use std::{fs::File, io, io::prelude::*, io::BufReader, vec::Vec};
+
+impl TaskList {
+    fn save(&mut self) -> () {
+        let stdin = io::stdin();
+        let stdin = stdin.lock();
+        let mut lines = stdin.lines();
+
+        println!("Add title to your task");
+        let subject = lines.next().unwrap().unwrap();
+
+        println!("Add message to your task");
+        let message = lines.next().unwrap().unwrap();
+
+        println!("Add number to your task");
+        let number = lines.next().unwrap().unwrap().parse::<u16>().unwrap();
+
+        let new_task = Task {
+            subject: subject,
+            message: message,
+            number: number,
+        };
+
+        self.task.push(new_task);
+    }
+
+    fn list(&mut self) -> () {
+        for x in &self.task {
+            println!("No: {:?}", x.number);
+            println!("Subject:{:?}", x.subject);
+            println!("Description:{:?}", x.message);
+            println!();
+        }
+    }
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 struct TaskList {
@@ -31,9 +65,6 @@ fn main() -> std::io::Result<()> {
             Arg::with_name("save")
                 .short("s")
                 .long("save")
-                .takes_value(true)
-                .number_of_values(3)
-                .value_names(&["SUBJECT", "MESSAGE", "NUMBER"])
                 .help("Save task to list"),
         )
         .get_matches();
@@ -46,42 +77,13 @@ fn main() -> std::io::Result<()> {
 
     let mut task: TaskList = toml::from_str(&contents).unwrap();
 
-    match matches.occurrences_of("list") {
-        1 => {
-            for x in &task.task {
-                println!("{:?}", x.subject);
-                println!("{:?}", x.message);
-                println!();
-            }
-        }
-        _ => println!("I have nothing to do :<"),
+    if matches.is_present("list") {
+        task.list();
     }
 
     if matches.is_present("save") {
-        let vals: Vec<&str> = matches.values_of("save").unwrap().collect();
-
-        println!("vals{:?}", vals);
-        // println!("{:?}", task);
-
-        let new_task2 = Task {
-            subject: vals[0].to_string(),
-            message: vals[1].to_string(),
-            number: vals[2].parse::<u16>().unwrap(),
-        };
-
-        println!("TASK 2 {:?}", new_task2);
-        task.task.push(new_task2);
+        task.save();
     }
-
-    let new_task = Task {
-        subject: "example title".to_string(),
-        message: "example message".to_string(),
-        number: 6,
-    };
-
-    task.task.push(new_task);
-
-    println!("{:?}", task);
 
     let toml = toml::to_string(&task).unwrap();
 
