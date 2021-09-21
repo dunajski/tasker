@@ -1,4 +1,8 @@
 ### It should be simple CLI aplication to:
-    * save tasks,
-    * browse tasks,
-    * track completion of tasks.
+- [x] save tasks,
+- [x] list tasks,
+- [x] remove tasks,
+- [ ] create new list,
+- [ ] change number of task,
+- [ ] labels (home, job, urgent, future)
+- [ ] **HARD** interactive jumping instead of invoking by one step with keybindings

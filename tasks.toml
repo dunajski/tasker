@@ -3,19 +3,15 @@ title = "Task list"
 [[task]]
 subject = "Shopping"
 message = "Sugar, flour, other stuff"
-number = 1
 
 [[task]]
 subject = "Cleaning"
 message = "floor"
-number = 2
 
 [[task]]
 subject = "Example Subject from terminal"
 message = "Example Message from terminal"
-number = 321
 
 [[task]]
-subject = "example title"
-message = "example message"
-number = 6
+subject = "Add another task after auto count"
+message = "Check that is fine?"

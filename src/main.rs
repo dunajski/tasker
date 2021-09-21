@@ -12,27 +12,35 @@ impl TaskList {
         println!("Add title to your task");
         let subject = lines.next().unwrap().unwrap();
 
-        println!("Add message to your task");
+        println!("Add description");
         let message = lines.next().unwrap().unwrap();
-
-        println!("Add number to your task");
-        let number = lines.next().unwrap().unwrap().parse::<u16>().unwrap();
 
         let new_task = Task {
             subject: subject,
             message: message,
-            number: number,
         };
 
         self.task.push(new_task);
     }
 
     fn list(&mut self) -> () {
+        let mut z = 1u16;
         for x in &self.task {
-            println!("No: {:?}", x.number);
+            println!("No: {:?}", z);
             println!("Subject:{:?}", x.subject);
             println!("Description:{:?}", x.message);
             println!();
+            z += 1;
+        }
+    }
+
+    fn remove(&mut self, number_of_task: u16) -> () {
+        let number_of_task = number_of_task.into();
+        if self.task.len() < number_of_task {
+            println!("There is no task with {} number.", number_of_task);
+            return;
+        } else {
+            self.task.remove(number_of_task - 1); // -1 because indexing from 0
         }
     }
 }
@@ -47,7 +55,6 @@ struct TaskList {
 struct Task {
     subject: String,
     message: String,
-    number: u16,
 }
 
 fn main() -> std::io::Result<()> {
@@ -67,26 +74,43 @@ fn main() -> std::io::Result<()> {
                 .long("save")
                 .help("Save task to list"),
         )
+        .arg(
+            Arg::with_name("remove")
+                .short("r")
+                .long("remove")
+                .help("Remove task with given number")
+                .value_name("number of task")
+                .takes_value(true),
+        )
         .get_matches();
 
-    // matches.is_present("s")
+    // Open file to read actual tasks
     let file = File::open("tasks.toml")?;
     let mut buf_reader = BufReader::new(file);
     let mut contents = String::new();
     buf_reader.read_to_string(&mut contents)?;
 
-    let mut task: TaskList = toml::from_str(&contents).unwrap();
+    // ... and serialize content to TaskList type variable
+    let mut tasks: TaskList = toml::from_str(&contents).unwrap();
 
+    // check invoked arguments
     if matches.is_present("list") {
-        task.list();
+        tasks.list();
     }
 
     if matches.is_present("save") {
-        task.save();
+        tasks.save();
     }
 
-    let toml = toml::to_string(&task).unwrap();
+    if matches.is_present("remove") {
+        let number = matches.value_of("remove").unwrap();
+        tasks.remove(number.parse::<u16>().unwrap());
+    }
 
+    // convert back tasks to toml string
+    let toml = toml::to_string(&tasks).unwrap();
+
+    // and save to file
     let mut file = File::create("tasks.toml")?;
     file.write(toml.as_bytes())?;
     Ok(())
